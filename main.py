@@ -47,6 +47,7 @@ def initialize(items):
 		metadata = {
 			"fanart": image_path % "back.jpg",
 			"poster": image_path % image,
+			"icon": image_path % image
 		}
 
 		list_item.setArt(metadata)
@@ -76,6 +77,7 @@ def show_genres(which):
 		metadata = {
 			"fanart": image_path % "back.jpg",
 			"poster": image_path % settings.movie_genres_image,
+			"icon": image_path % settings.movie_genres_image
 		}
 
 		list_item.setArt(metadata)
@@ -106,6 +108,7 @@ def show_years(which):
 		metadata = {
 			"fanart": image_path % "back.jpg",
 			"poster": image_path % settings.movie_years_image,
+			"icon": image_path % settings.movie_years_image
 		}
 
 		list_item.setArt(metadata)
@@ -212,6 +215,7 @@ def search_movie(
 		metadata = {
 			"fanart": image_path % "back.jpg",
 			"poster": image_path % settings.next_image,
+			"icon": image_path % settings.next_image
 		}
 
 		list_item.setArt(metadata)
@@ -316,6 +320,7 @@ def search_tvshow(
 		metadata = {
 			"fanart": image_path % "back.jpg",
 			"poster": image_path % settings.next_image,
+			"icon": image_path % settings.next_image
 		}
 
 		list_item.setArt(metadata)
@@ -366,7 +371,8 @@ def search_person(person, which, page = 1):
 
 		metadata_art = {
 			"poster": moviedbutils.get_image(result['profile_path']),
-			"fanart": image_path % "back.jpg"
+			"fanart": image_path % "back.jpg",
+			"icon": image_path % "back.jpg"
 		}
 
 		list_item.setArt(metadata_art)
@@ -392,6 +398,7 @@ def search_person(person, which, page = 1):
 		metadata = {
 			"fanart": image_path % "back.jpg",
 			"poster": image_path % settings.next_image,
+			"icon": image_path % settings.next_image
 		}
 
 		list_item.setArt(metadata)
