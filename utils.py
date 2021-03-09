@@ -6,7 +6,6 @@ waste = {
 def optimize_title(title):
 	title = (
 		title
-		.encode("utf-8")
 		.lower()
 		.replace(" and ", "&")
 		.replace("&amp;", "&")
