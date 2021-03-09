@@ -6,10 +6,9 @@ import settings
 import xbmcplugin
 import get_media_metadata
 from xbmcaddon import Addon
-from urllib import urlencode
-from urlparse import parse_qsl
 from TheMovieDB import MovieDB
 from sys import argv, version_info
+from urllib.parse import urlencode, parse_qsl
 
 _url = argv[0]
 _handle = int(argv[1])
