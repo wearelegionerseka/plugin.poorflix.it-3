@@ -304,7 +304,7 @@ def search_tvshow(
 
 		url = get_url(
 			action = "show_seasons", title = title,
-			tvshow_id = tvshow_id, seasons = seasons
+			tvshow_id = tvshow_id, seasons = seasons, image = metadata_art['fanart']
 		)
 
 		is_folder = True
@@ -504,21 +504,21 @@ def list_tvshow_person(person_id):
 	pDialog.close()
 	xbmcplugin.endOfDirectory(_handle)
 
-def list_seasons(title, tvshow_id, seasons):
+def list_seasons(title, tvshow_id, seasons, image):
 	xbmcplugin.setPluginCategory(_handle, "Result")
 	xbmcplugin.setContent(_handle, "tvshows")
 
 	for a in seasons:
 		metadata_art, metadata_movie, metadata_cast = get_media_metadata.get_infos_season(tvshow_id, a)
 		list_item = xbmcgui.ListItem(label = metadata_movie['title'])
-		metadata_art['fanart'] = image_path % "back.jpg"
+		metadata_art['fanart'] = image
 		list_item.setArt(metadata_art)
 		list_item.setCast(metadata_cast)
 		list_item.setInfo("video", metadata_movie)
 
 		url = get_url(
 			action = "show_episodes", title = title,
-			tvshow_id = tvshow_id, season = a['season_number']
+			tvshow_id = tvshow_id, season = a['season_number'], image = image
 		)
 
 		is_folder = True
@@ -526,7 +526,7 @@ def list_seasons(title, tvshow_id, seasons):
 
 	xbmcplugin.endOfDirectory(_handle)
 
-def list_episodes(title, tvshow_id, season):
+def list_episodes(title, tvshow_id, season, image):
 	xbmcplugin.setPluginCategory(_handle, "Result")
 	xbmcplugin.setContent(_handle, "episodes")
 	results = moviedb.get_season(tvshow_id, season, "it")['episodes']
@@ -534,7 +534,7 @@ def list_episodes(title, tvshow_id, season):
 	for a in results:
 		list_item = xbmcgui.ListItem(label = a['name'])
 		metadata_art, metadata_movie, metadata_cast = get_media_metadata.get_infos_episode(tvshow_id, a)
-		metadata_art['fanart'] = image_path % "back.jpg"
+		metadata_art['fanart'] = image
 		list_item.setArt(metadata_art)
 		list_item.setCast(metadata_cast)
 		list_item.setInfo("video", metadata_movie)
@@ -564,7 +564,6 @@ def list_mirros_episode(
 	from difflib import SequenceMatcher
 	from requests import ReadTimeout, ConnectionError
 
-	metadata_art['fanart'] = image_path % "back.jpg"
 	xbmcplugin.setPluginCategory(_handle, "Mirror")
 	xbmcplugin.setContent(_handle, "tvshows")
 	pDialog = xbmcgui.DialogProgress()
@@ -917,13 +916,13 @@ def router(paramstring):
 
 			list_seasons(
 				params['title'], params['tvshow_id'],
-				seasons
+				seasons, params['image']
 			)
 
 		elif params['action'] == "show_episodes":
 			list_episodes(
 				params['title'], params['tvshow_id'],
-				params['season']
+				params['season'], params['image']
 			)
 
 		elif params['action'] == "show_movies_person":
