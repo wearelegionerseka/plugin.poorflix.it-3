@@ -6,7 +6,9 @@ from base64 import b64decode
 from bs4 import BeautifulSoup
 from requests import post, get
 from difflib import SequenceMatcher
+from cloudscraper import create_scraper as cl_scrape
 from scrapers.exceptions.exceptions import ScrapingFailed
+from cloudscraper.exceptions import CloudflareChallengeError
 
 if version_info.major < 3:
 	from urlparse import urlparse
@@ -137,17 +139,25 @@ def adfly_decode(url):
 	return url
 
 def vcrypt_decode(url):
-	body = get(url, headers = headers)
-
-	if not "vcrypt" in body.url:
-		return body.url
-
-	parse = BeautifulSoup(body.text, "html.parser")
-
 	if "open" in url:
+		body = get(url, headers = headers)
+		parse = BeautifulSoup(body.text, "html.parser")
 		url = parse.find("iframe").get("src")
 
+	elif "wse" in url:
+		start_scrape = cl_scrape()
+		url = start_scrape.get(url).url
+
 	elif "wss" in url:
+		start_scrape = cl_scrape()
+
+		try:
+			body = start_scrape.get(url)
+		except:
+			raise ScrapingFailed(url)
+
+		parse = BeautifulSoup(body.text, "html.parser")
+
 		try:
 			url = (
 				str(
@@ -160,6 +170,9 @@ def vcrypt_decode(url):
 			raise ScrapingFailed(url)
 
 		url = get(url, headers = headers).url
+
+	"""
+	body = get(url, headers = headers)
 
 	else:
 		key = (
@@ -178,6 +191,7 @@ def vcrypt_decode(url):
 			url_post, post_data,
 			headers = headers
 		).url
+	"""
 
 	return url
 

@@ -25,7 +25,7 @@ def get_video(url, referer):
 
 	indexs = (
 		piece
-		.split("//")[2]
+		.split("//")[1]
 		.split("\"")[0]
 	)
 
