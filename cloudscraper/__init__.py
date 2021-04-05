@@ -11,7 +11,7 @@ from copy import deepcopy
 
 from requests.adapters import HTTPAdapter
 from requests.sessions import Session
-from requests_toolbelt.utils import dump
+#from requests_toolbelt.utils import dump
 
 from time import sleep
 
@@ -197,7 +197,7 @@ class CloudScraper(Session):
     @staticmethod
     def debugRequest(req):
         try:
-            print(dump.dump_all(req).decode('utf-8'))
+            pass#print(dump.dump_all(req).decode('utf-8'))
         except ValueError as e:
             print(f"Debug Error: {getattr(e, 'message', e)}")
 
