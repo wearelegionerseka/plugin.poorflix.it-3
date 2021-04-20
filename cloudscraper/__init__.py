@@ -58,7 +58,7 @@ from .user_agent import User_Agent
 
 # ------------------------------------------------------------------------------- #
 
-__version__ = '1.2.56'
+__version__ = '1.2.58'
 
 # ------------------------------------------------------------------------------- #
 
@@ -187,7 +187,7 @@ class CloudScraper(Session):
 
     def simpleException(self, exception, msg):
         self._solveDepthCnt = 0
-        #sys.tracebacklimit = 0
+        sys.tracebacklimit = 0
         raise exception(msg)
 
     # ------------------------------------------------------------------------------- #
@@ -197,7 +197,7 @@ class CloudScraper(Session):
     @staticmethod
     def debugRequest(req):
         try:
-            pass#print(dump.dump_all(req).decode('utf-8'))
+            pass#print(dump.dump_all(req).decode('utf-8', errors='backslashreplace'))
         except ValueError as e:
             print(f"Debug Error: {getattr(e, 'message', e)}")
 
@@ -355,7 +355,7 @@ class CloudScraper(Session):
                 resp.headers.get('Server', '').startswith('cloudflare')
                 and resp.status_code in [429, 503]
                 and re.search(
-                    r'cpo.src\s*=\s*"/cdn-cgi/challenge-platform/\S+orchestrate/jsch/v1"',
+                    r'cpo.src\s*=\s*"/cdn-cgi/challenge-platform/\S+orchestrate/jsch/v1',
                     resp.text,
                     re.M | re.S
                 )
@@ -376,7 +376,7 @@ class CloudScraper(Session):
             return (
                 CloudScraper.is_Captcha_Challenge(resp)
                 and re.search(
-                    r'cpo.src\s*=\s*"/cdn-cgi/challenge-platform/\S+orchestrate/captcha/v1"',
+                    r'cpo.src\s*=\s*"/cdn-cgi/challenge-platform/\S+orchestrate/captcha/v1',
                     resp.text,
                     re.M | re.S
                 )

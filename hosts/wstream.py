@@ -59,7 +59,7 @@ def get_video(url, referer):
 		#url = get_emb(url)
 
 	body = get(url, headers = headers).text
-	
+
 	"""
 	video_url = (
 		body
@@ -68,9 +68,7 @@ def get_video(url, referer):
 		.split("\"")[0]
 	)
 
-	return video_url
 	"""
-
 	pieces = BeautifulSoup(body, "html.parser").find_all("script")
 	piece = get_piece(pieces)
 	splitted = [""]
@@ -78,7 +76,7 @@ def get_video(url, referer):
 
 	indexs = (
 		piece
-		.split("//")[1]
+		.split("//")[2]
 		.split("\"")[0]
 	)
 

@@ -13,7 +13,7 @@ from scrapers.utils import (
 	get_domain, decode_middle_encrypted, headers
 )
 
-host = "https://altadefinizione.capital/"
+host = "https://altadefinizione.cheap/"
 excapes = ["Back", "back", ""]
 timeout = 30
 is_cloudflare = False
@@ -149,6 +149,7 @@ def identify(info):
 	domain = info['domain']
 	#print(link, mirror, domain)
 	link = m_identify(link)
+	#print(link)
 	return hosts[mirror].get_video(link, domain)
 
 def menu():

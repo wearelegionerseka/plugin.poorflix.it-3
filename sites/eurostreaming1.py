@@ -14,7 +14,7 @@ from scrapers.utils import (
 	get_domain, headers
 )
 
-host = "https://eurostreaming.team/"
+host = "https://eurostreaming.center/"
 excapes = ["Back", "back", ""]
 timeout = 4
 is_cloudflare = False
