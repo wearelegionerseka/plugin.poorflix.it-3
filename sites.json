@@ -57,7 +57,7 @@
 		},
 
 		"eurostreaming1": {
-			"link": "https://eurostreaming.center/",
+			"link": "https://eurostreaming.shop/",
 			"is_cloudflare": false,
 			"timeout": 8,
 			"works": true
@@ -71,7 +71,7 @@
 		},
 
 		"eurostreaming3": {
-			"link": "https://eurostreaming.blog/",
+			"link": "https://eurostreaming.house/",
 			"is_cloudflare": false,
 			"timeout": 8,
 			"works": true
