@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
-from requests import get
 from bs4 import BeautifulSoup
 from scrapers.utils import get_piece, headers
+from cloudscraper import create_scraper as cl_scrape
 from hosts.exceptions.exceptions import VideoNotAvalaible
 
 class Metadata:
@@ -22,9 +22,12 @@ def get_emb(url):
 	return url
 
 def get_video(url, referer):
-	url = get_emb(url)
+	#url = get_emb(url)
 	headers['Referer'] = referer
-	body = get(url, headers = headers).text
+	print(url)
+	cl = cl_scrape()
+	body = cl.get(url).text
+	print(body)
 	pieces = BeautifulSoup(body, "html.parser").find_all("script")
 
 	try:

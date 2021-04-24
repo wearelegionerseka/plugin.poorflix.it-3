@@ -180,6 +180,7 @@ def search_movie(
 
 		progress = 100 * times // l_results
 		title = result['title'].encode("utf-8")
+		en_title = result['original_title'].encode("utf-8")
 		movie_id = result['id']
 		list_item = xbmcgui.ListItem(label = title)
 
@@ -195,7 +196,8 @@ def search_movie(
 		list_item.setInfo("video", metadata_movie)
 
 		url = get_url(
-			action = "listing_movies", title = title,
+			action = "listing_movies",
+			title = title, en_title = en_title,
 			metadata_art = metadata_art,
 			metadata_movie = metadata_movie,
 			metadata_cast = metadata_cast
@@ -291,6 +293,7 @@ def search_tvshow(
 		progress = 100 * times // l_results
 		pDialog.update(progress, message)
 		title = result['name'].encode("utf-8")
+		en_title = result['original_name'].encode("utf-8")
 		tvshow_id = result['id']
 		list_item = xbmcgui.ListItem(label = title)
 		data = get_media_metadata.get_infos_tvshow(tvshow_id)
@@ -303,7 +306,8 @@ def search_tvshow(
 		list_item.setInfo("video", metadata_movie)
 
 		url = get_url(
-			action = "show_seasons", title = title,
+			action = "show_seasons",
+			title = title, en_title = en_title,
 			tvshow_id = tvshow_id, seasons = seasons, image = metadata_art['fanart']
 		)
 
@@ -504,7 +508,7 @@ def list_tvshow_person(person_id):
 	pDialog.close()
 	xbmcplugin.endOfDirectory(_handle)
 
-def list_seasons(title, tvshow_id, seasons, image):
+def list_seasons(title, en_title, tvshow_id, seasons, image):
 	xbmcplugin.setPluginCategory(_handle, "Result")
 	xbmcplugin.setContent(_handle, "tvshows")
 
@@ -517,7 +521,7 @@ def list_seasons(title, tvshow_id, seasons, image):
 		list_item.setInfo("video", metadata_movie)
 
 		url = get_url(
-			action = "show_episodes", title = title,
+			action = "show_episodes", title = title, en_title = en_title,
 			tvshow_id = tvshow_id, season = a['season_number'], image = image
 		)
 
@@ -526,7 +530,7 @@ def list_seasons(title, tvshow_id, seasons, image):
 
 	xbmcplugin.endOfDirectory(_handle)
 
-def list_episodes(title, tvshow_id, season, image):
+def list_episodes(title, en_title, tvshow_id, season, image):
 	xbmcplugin.setPluginCategory(_handle, "Result")
 	xbmcplugin.setContent(_handle, "episodes")
 	results = moviedb.get_season(tvshow_id, season, "it")['episodes']
@@ -542,6 +546,7 @@ def list_episodes(title, tvshow_id, season, image):
 		url = get_url(
 			action = "listing_tvshow",
 			title = title,
+			en_title = en_title,
 			season = season,
 			episode = a['episode_number'],
 			metadata_art = metadata_art,
@@ -555,7 +560,7 @@ def list_episodes(title, tvshow_id, season, image):
 	xbmcplugin.endOfDirectory(_handle)
 
 def list_mirros_episode(
-	title, season,
+	title, en_title, season,
 	episode, metadata_art,
 	metadata_movie, metadata_cast
 ):
@@ -578,22 +583,18 @@ def list_mirros_episode(
 	mirrors = []
 	title = title.lower()
 
-	for a in sites_serietv:
-		if pDialog.iscanceled():
-			break
-
-		progress = 100 * times // l_results
+	def find_link(a, title):
 		link = None
 
 		try:
 			results = a.search_serie(title)['results']
 		except (ReadTimeout, ConnectionError):
 			pDialog.update(progress, messages['episode'])
-			times += 1
-			continue
+			return
 
 		for b in results:
 			c_title = optimize_title(b['title'])
+			title = optimize_title(title)
 
 			ratio = SequenceMatcher(
 				a = title,
@@ -603,6 +604,18 @@ def list_mirros_episode(
 			if ratio >= 0.90:
 				link = b['link']
 				break
+
+		return link
+
+	for a in sites_serietv:
+		if pDialog.iscanceled():
+			break
+
+		progress = 100 * times // l_results
+		link = find_link(a, title)
+
+		if not link:
+			link = find_link(a, en_title)
 
 		if not link:
 			pDialog.update(progress, messages['episode'])
@@ -655,7 +668,7 @@ def list_mirros_episode(
 
 	xbmcplugin.endOfDirectory(_handle)
 
-def list_mirros_movie(title, metadata_art, metadata_movie, metadata_cast):
+def list_mirros_movie(title, en_title, metadata_art, metadata_movie, metadata_cast):
 	from sites import sites_film
 	from difflib import SequenceMatcher
 	from requests import ReadTimeout, ConnectionError
@@ -687,22 +700,18 @@ def list_mirros_movie(title, metadata_art, metadata_movie, metadata_cast):
 	title = title.lower()
 	new_string = ""
 
-	for a in sites_film:
-		if pDialog.iscanceled():
-			break
-
-		progress = 100 * times // l_results
+	def find_link(a, title):
 		link = None
 
 		try:
 			results = a.search_film(title)['results']
 		except (ReadTimeout, ConnectionError):
 			pDialog.update(progress, new_string)
-			times += 1
-			continue
+			return
 
 		for b in results:
 			c_title = optimize_title(b['title'])
+			title = optimize_title(title)
 
 			ratio = SequenceMatcher(
 				a = title,
@@ -716,18 +725,30 @@ def list_mirros_movie(title, metadata_art, metadata_movie, metadata_cast):
 		if not link:
 			for b in results:
 				c_title = optimize_title(b['title'])
+
 				if check_word_sentence(title, c_title):
 					link = b['link']
 
-			if not link:
-				pDialog.update(progress, new_string)
-				times += 1
-				continue
+		return link
+
+	for a in sites_film:
+		if pDialog.iscanceled():
+			break
+
+		progress = 100 * times // l_results
+		link = find_link(a, title)
+
+		if not link:
+			link = find_link(a, en_title)
+
+		if not link:
+			pDialog.update(progress, new_string)
+			times += 1
+			continue
 
 		try:
 			current_mirrors = a.search_mirrors(link)['results']
 		except Exception as a:
-			print(a)
 			continue
 
 		for b in current_mirrors:
@@ -915,14 +936,14 @@ def router(paramstring):
 			seasons = eval(params['seasons'])
 
 			list_seasons(
-				params['title'], params['tvshow_id'],
-				seasons, params['image']
+				params['title'], params['en_title'],
+				params['tvshow_id'], seasons, params['image']
 			)
 
 		elif params['action'] == "show_episodes":
 			list_episodes(
-				params['title'], params['tvshow_id'],
-				params['season'], params['image']
+				params['title'], params['en_title'],
+				params['tvshow_id'], params['season'], params['image']
 			)
 
 		elif params['action'] == "show_movies_person":
@@ -937,8 +958,8 @@ def router(paramstring):
 			metadata_cast = eval(params['metadata_cast'])
 
 			list_mirros_movie(
-				params['title'], metadata_art,
-				metadata_movie, metadata_cast
+				params['title'], params['en_title'],
+				metadata_art, metadata_movie, metadata_cast
 			)
 
 		elif params['action'] == "listing_tvshow":
@@ -948,8 +969,8 @@ def router(paramstring):
 			metadata_cast = eval(params['metadata_cast'])
 
 			list_mirros_episode(
-				params['title'], params['season'],
-				episode, metadata_art,
+				params['title'], params['en_title'],
+				params['season'], episode, metadata_art,
 				metadata_movie, metadata_cast
 			)
 

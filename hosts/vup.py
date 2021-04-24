@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from requests import get
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 from scrapers.utils import get_piece, headers
 from hosts.exceptions.exceptions import VideoNotAvalaible
 
@@ -13,6 +13,17 @@ class Metadata:
 def get_video(url, referer):
 	headers['Referer'] = referer
 	body = get(url, headers = headers).text
+
+	video_url = (
+		body
+		.split("sources: [{")[1]
+		.split("\"")[1]
+		.split("\"")[0]
+	)
+
+	return video_url
+
+	"""
 	pieces = BeautifulSoup(body, "html.parser").find_all("script")
 
 	try:
@@ -77,3 +88,4 @@ def get_video(url, referer):
 		video_url += "/"
 
 	return video_url[:-1]
+	"""
