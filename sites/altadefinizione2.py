@@ -1,7 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from hosts import hosts
-from sys import version_info
 from bs4 import BeautifulSoup
 from requests import post, get
 from hosts.exceptions.exceptions import VideoNotAvalaible
@@ -11,13 +10,10 @@ from scrapers.utils import (
 	m_identify, get_domain, headers
 )
 
-host = "https://www.altadefinizione01.software/"
+host = "https://www.altadefinizione01.coach/"
 excapes = ["Back", "back", ""]
 timeout = 4
 is_cloudflare = False
-
-if version_info.major < 3:
-	input = raw_input
 
 def search_film(film_to_search):
 	search_data = {

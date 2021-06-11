@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from time import sleep
 from bs4 import BeautifulSoup

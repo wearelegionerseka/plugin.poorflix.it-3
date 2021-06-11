@@ -7,19 +7,10 @@ from hosts.exceptions.exceptions import VideoNotAvalaible
 
 class Metadata:
 	def __init__(self):
-		self.logo = "https://cloudvideo.tv/static/img/logo5.png"
-		self.icon = "https://cloudvideo.tv/favicon.ico"
-
-def get_emb(url):
-	if not "embed" in url:
-		url = url.split("/")
-		url[-1] = "embed-%s.html" % url[-1]
-		url = "/".join(url)
-
-	return url
+		self.logo = "https://upstream.to/mngez/images/logo.png"
+		self.icon = "https://upstream.to/mngez/images/favicon.png"
 
 def get_video(url, referer):
-	url = get_emb(url)
 	headers['Referer'] = referer
 	body = get(url, headers = headers).text
 	pieces = BeautifulSoup(body, "html.parser").find_all("script")
@@ -34,12 +25,12 @@ def get_video(url, referer):
 
 	indexs = (
 		piece
-		.split("//")[1]
+		.split("//")[2]
 		.split("\"")[0]
 	)
 
 	s_indexs = indexs.split("/")
-	video_url = "http://"
+	video_url = "https://"
 
 	for a in range(
 		len(s_indexs)
@@ -74,9 +65,7 @@ def get_video(url, referer):
 					if b != things[-1][1:]:
 						video_url += ","
 				except ValueError:
-					s_b = b.split(".")
-					index = int(s_b[1], 36)
-					video_url += "v.%s" % splitted[index]
+					raise VideoNotAvalaible(url)
 
 		elif a == 3:
 			things = s_indexs[a].split(".")

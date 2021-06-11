@@ -1,8 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from hosts import hosts
 from requests import get
-from sys import version_info
 from bs4 import BeautifulSoup
 from scrapers.excape_cloudflare import ex_Cloudflare
 from hosts.exceptions.exceptions import VideoNotAvalaible
@@ -10,7 +9,8 @@ from hosts.exceptions.exceptions import VideoNotAvalaible
 from scrapers.utils import (
 	recognize_link, recognize_mirror,
 	m_identify, get_from_cloudflare,
-	get_domain, decode_middle_encrypted, headers
+	get_domain, decode_middle_encrypted,
+	norm_title, headers
 )
 
 host = "https://altadefinizione.cheap/"
@@ -18,10 +18,8 @@ excapes = ["Back", "back", ""]
 timeout = 30
 is_cloudflare = False
 
-if version_info.major < 3:
-	input = raw_input
-
 def search_film(film_to_search):
+	film_to_search = norm_title(film_to_search)
 	search_url = "{}?s={}".format(host, film_to_search)
 
 	if is_cloudflare:

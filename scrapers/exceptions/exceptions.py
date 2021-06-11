@@ -1,5 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 class ScrapingFailed(Exception):
 	def __init__(self, message):
-		Exception.__init__(self, "Can not scrape %s :(" % message)
+		super().__init__("Can not scrape %s :(" % message)

@@ -1,30 +1,31 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from hosts import hosts
-from requests import get
-from sys import version_info
 from bs4 import BeautifulSoup
+from requests import post, get
 from hosts.exceptions.exceptions import VideoNotAvalaible
-from scrapers.exceptions.exceptions import ScrapingFailed
 
 from scrapers.utils import (
-	recognize_link, recognize_mirror,
-	m_identify, headers, get_domain
+	recognize_title, recognize_link, recognize_mirror,
+	m_identify, decode_middle_encrypted,
+	get_domain, headers
 )
 
-host = "https://altadefinizione.gg/"
+host = "https://cineblog01.legal/"
 excapes = ["Back", "back", ""]
 timeout = 4
 is_cloudflare = False
 
-if version_info.major < 3:
-	input = raw_input
-
 def search_film(film_to_search):
-	search_url = "{}?s={}".format(host, film_to_search)
+	search_data = {
+		"story": film_to_search,
+		"do": "search",
+		"subaction": "search"
+	}
 
-	body = get(
-		search_url,
+	body = post(
+		host,
+		params = search_data,
 		headers = headers,
 		timeout = timeout
 	).text
@@ -37,24 +38,19 @@ def search_film(film_to_search):
 
 	how = json['results']
 
-	for a in parsing.find_all("div", class_ = "col-lg-4 col-md-4 col-xs-4 lazyload"):
-		try:
-			image = (
-				a
-				.find("picture")
-				.find("img")
-				.get("data-src")
-			)
-		except AttributeError:
-			image = None
+	for a in parsing.find_all("div", class_ = "filmbox"):
+		image = host + a.find("img").get("src")
 
-		link = a.find("a").get("href")
-
-		title = (
+		some = (
 			a
-			.find("h2")
-			.get_text()
-			.split(" [")[0]
+			.find("div", class_ = "col-md-8")
+			.find("a")
+		)
+
+		link = some.get("href")
+
+		title = recognize_title(
+			some.get_text()
 		)
 
 		data = {
@@ -66,11 +62,14 @@ def search_film(film_to_search):
 		how.append(data)
 
 	return json
-	
+
 def search_mirrors(film_to_see):
 	domain = get_domain(film_to_see)
-	body = get(film_to_see).text
+	body = get(film_to_see, headers = headers).text
 	parsing = BeautifulSoup(body, "html.parser")
+	parsing = parsing.find("div", class_ = "tab-content")
+	array = parsing.find_all("div", class_ = "tab-pane")
+	del array[0]
 
 	json = {
 		"results": []
@@ -78,22 +77,21 @@ def search_mirrors(film_to_see):
 
 	datas = json['results']
 
-	for a in parsing.find_all("tr", id = "movkbGKmW492336"):
-		tds = a.find_all("td")
+	for a in array:
+		link_mirror = recognize_link(
+			a
+			.find("iframe")
+			.get("src")
+		)
 
 		mirror = recognize_mirror(
-			tds[1].get_text()[1:]
+			a.get("id")
 		)
+
+		quality = "720p"
 
 		try:
 			hosts[mirror]
-			quality = tds[2].get_text()
-
-			link_mirror = recognize_link(
-				a
-				.find("a")
-				.get("href")
-			)
 
 			data = {
 				"mirror": mirror,
@@ -112,7 +110,6 @@ def identify(info):
 	link = info['link']
 	mirror = info['mirror']
 	domain = info['domain']
-	#print(link, mirror, domain)
 	link = m_identify(link)
 	return hosts[mirror].get_video(link, domain)
 
@@ -165,7 +162,7 @@ def menu():
 
 					try:
 						video = identify(datas[index])
-					except (VideoNotAvalaible, ScrapingFailed) as a:
+					except VideoNotAvalaible as a:
 						print(a)
 						continue
 

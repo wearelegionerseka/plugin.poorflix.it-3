@@ -1,23 +1,17 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
-from sys import version_info
 from hosts import host_files
 from base64 import b64decode
 from bs4 import BeautifulSoup
 from requests import post, get
 from difflib import SequenceMatcher
+from urllib.parse import parse_qs, urlparse
 from cloudscraper import create_scraper as cl_scrape
 from scrapers.exceptions.exceptions import ScrapingFailed
 from cloudscraper.exceptions import CloudflareChallengeError
 
-if version_info.major < 3:
-	from urlparse import urlparse
-else:
-	from urllib.parse import urlparse
-
-
 headers = {
-	"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0",
+	"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0",
 	"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
 	"Accept-Language": "it-IT,it;q=0.8,en-US;q=0.5,en;q=0.3"
 }
@@ -37,6 +31,18 @@ for a in range(
 		dnw.append(
 			host_files[a][:-7]
 		)
+
+def norm_title(title):
+	s_title = title.split(" ")
+	normalized_title = ""
+
+	for a in s_title:
+		if "'" in a:
+			continue
+
+		normalized_title += f"{a} "
+
+	return normalized_title
 
 def check_mirror(mirror):
 	array1 = []
@@ -67,6 +73,9 @@ def recognize_mirror(mirror):
 	if mirror == "ciao":
 		mirror = "vidmoly"
 
+	if mirror == "vupstream":
+		mirror = "vup"
+
 	if mirror in dnw:
 		return mirror
 
@@ -76,6 +85,8 @@ def recognize_mirror(mirror):
 	return mirror
 
 def recognize_link(link_mirror):
+	link_mirror = link_mirror.replace(" ", "")
+
 	if not link_mirror.startswith("http"):
 		link_mirror = "http:%s" % link_mirror
 
@@ -88,6 +99,9 @@ def recognize_title(title):
 		.replace(" Serie TV", "")
 		.replace(" streaming", "")
 		.replace("la Serie", "La Serie")
+		.replace(" [HD]", "")
+		.replace(" [ITA]", "")
+		.split("(")[0]
 	)
 
 	return title
@@ -275,6 +289,20 @@ def rapidcrypt_decode(url):
 
 	return url
 
+def linksafe_decode(url):
+	parsed = urlparse(url)
+	queries = parse_qs(parsed.query)
+	base64_code = queries['url'][0]
+	url = b64decode(base64_code).decode()
+	return url
+
+def q_gs_decode(url):
+	url = "/".join(
+		url.split("/")[4:]
+	)
+
+	return url
+
 def get_from_cloudflare(url):
 	url = recognize_link(
 		url.split("https:")[2]
@@ -283,19 +311,23 @@ def get_from_cloudflare(url):
 	return url
 
 def m_identify(link):
-	link = link.replace("\r", "")
-	link = link.replace(" ", "")
+	link = (
+		link
+		.replace("\r", "")
+		.replace(" ", "")
+	)
 
 	c_supported = [
 		"", "fasturl", "buckler",
-		"vcrypt", "snip", "linkhub", "rapidcrypt",
+		"vcrypt", "snip", "linkhub",
+		"rapidcrypt", "linksafe", "q.gs",
 		"linkup", "gatustox", "cowner", "rweasy"
 	]
 
 	functions = [
 		"", fasturl_decode, buckler_decode,
 		vcrypt_decode, snip_decode, linkhub_decode,
-		rapidcrypt_decode
+		rapidcrypt_decode, linksafe_decode, q_gs_decode
 	]
 
 	indexed = c_supported.index("linkup")

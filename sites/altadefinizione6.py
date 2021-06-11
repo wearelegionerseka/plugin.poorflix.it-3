@@ -1,8 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from hosts import hosts
 from requests import get
-from sys import version_info
 from bs4 import BeautifulSoup
 from hosts.exceptions.exceptions import VideoNotAvalaible
 
@@ -15,9 +14,6 @@ host = "https://altadefinizione.la/"
 excapes = ["Back", "back", ""]
 timeout = 4
 is_cloudflare = False
-
-if version_info.major < 3:
-	input = raw_input
 
 def search_film(film_to_search):
 	search_url = "{}?search={}".format(host, film_to_search)

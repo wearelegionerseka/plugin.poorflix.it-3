@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from requests import get, head
 #from bs4 import BeautifulSoup

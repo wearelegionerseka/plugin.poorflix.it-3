@@ -1,7 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from hosts import hosts
-from sys import version_info
 from bs4 import BeautifulSoup
 from requests import post, get
 from hosts.exceptions.exceptions import VideoNotAvalaible
@@ -11,30 +10,27 @@ from scrapers.utils import (
 	m_identify, get_domain, headers
 )
 
-host = "https://altadefinizione.cards/"
+host = "https://cbo1.watch/"
 excapes = ["Back", "back", ""]
 timeout = 4
 is_cloudflare = False
 
-if version_info.major < 3:
-	input = raw_input
-
 def search_film(film_to_search):
+	search_url = f"{host}engine/ajax/search.php"
+
 	search_data = {
-		"story": film_to_search,
-		"do": "search",
-		"subaction": "search",
-		"titleonly": "3"
+		"query": film_to_search,
+		"user_hash": "2e4a7dacdce1f7ecac038c03fbab39c42fb4bd6f"
 	}
 
 	body = post(
-		host,
-		params = search_data,
+		search_url,
+		search_data,
 		headers = headers,
 		timeout = timeout
 	).text
 
-	parsing = BeautifulSoup(body, "html.parser").find_all("div", class_ = "col-lg-3 col-md-3 col-xs-4")
+	parsing = BeautifulSoup(body, "html.parser")
 
 	json = {
 		"results": []
@@ -42,15 +38,15 @@ def search_film(film_to_search):
 
 	how = json['results']
 
-	for a in parsing:
-		image = a.find("img").get("src")
-		link = a.find("a").get("href")
-		title = a.find("h2").get_text()
+	for a in parsing.find_all("a")[:-1]:
+		image = None
+		link = a.get("href")
+		title = a.find("span").get_text()
 
 		data = {
 			"title": title,
 			"link": link,
-			"image": host + image
+			"image": image
 		}
 
 		how.append(data)
@@ -59,9 +55,11 @@ def search_film(film_to_search):
 
 def search_mirrors(film_to_see):
 	domain = get_domain(film_to_see)
-	body = get(film_to_see).text
+	body = get(film_to_see, headers = headers).text
 	parsing = BeautifulSoup(body, "html.parser")
-	mirrors = parsing.find("ul", id = "mirrors")
+	parsing = parsing.find("ul", class_ = "tabs")
+	array = parsing.find_all("li")
+	del array[0]
 
 	json = {
 		"results": []
@@ -69,21 +67,27 @@ def search_mirrors(film_to_see):
 
 	datas = json['results']
 
-	for a in mirrors.find_all("a"):
-		mirror = recognize_mirror(
-			a.get_text()
+	for a in array:
+		link_mirror = recognize_link(
+			a
+			.find("a")
+			.get("data-link")
 		)
+
+		mirror = recognize_mirror(
+			a
+			.get_text()
+			.lower()
+		)
+
+		quality = "720p"
 
 		try:
 			hosts[mirror]
 
-			link_mirror = recognize_link(
-				a.get("data-target")
-			)
-
 			data = {
 				"mirror": mirror,
-				"quality": "720p",
+				"quality": quality,
 				"link": link_mirror,
 				"domain": domain
 			}

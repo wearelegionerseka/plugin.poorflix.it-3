@@ -7,16 +7,15 @@ from hosts.exceptions.exceptions import VideoNotAvalaible
 
 from scrapers.utils import (
 	recognize_link, recognize_mirror,
-	m_identify, decode_middle_encrypted,
-	get_domain, headers
+	m_identify, get_domain, headers
 )
 
 try:
 	from utils import new_way
 except ImportError:
-	from sites.utils import new_way	
+	from sites.utils import new_way
 
-host = "https://cineblog01.bid/"
+host = "https://ilgeniodellostreaming.cyou/"
 excapes = ["Back", "back", ""]
 timeout = 4
 is_cloudflare = False
@@ -43,35 +42,33 @@ def search_film(film_to_search):
 
 	how = json['results']
 
-	for a in parsing.find_all("div", class_ = "story-cover"):
-		image = host + a.find("img").get("data-src")
-		some = a.find("a")
+	for a in parsing.find_all("div", class_ = "result-item"):
+		image = a.find("img").get("src")
+		some = a.find_all("a")[1]
 		link = some.get("href")
-		title = some.get("title")
+		title = some.get_text()
 
 		data = {
 			"title": title,
 			"link": link,
-			"image": image
+			"image": host + image
 		}
 
 		how.append(data)
 
 	return json
-
+	
 def search_mirrors(film_to_see):
+	domain = get_domain(film_to_see)
+	body = get(film_to_see).text
+	parsing = BeautifulSoup(body, "html.parser")
+	options = parsing.find("ul", class_ = "options-list")
+
 	try:
 		json = new_way(film_to_see)
 		return json
 	except:
 		pass
-
-	domain = get_domain(film_to_see)
-	body = get(film_to_see, headers = headers).text
-	parsing = BeautifulSoup(body, "html.parser")
-	parsing = parsing.find("div", class_ = "col-xs-6 col-md-4")
-	array = parsing.find_all("a")
-	del array[0]
 
 	json = {
 		"results": []
@@ -79,29 +76,21 @@ def search_mirrors(film_to_see):
 
 	datas = json['results']
 
-	for a in array:
-
-		link_enc = (
-			a
-			.get("href")
-			.split("link=")[1]
-			.split("&")[0]
-		)
-
-		link_mirror = recognize_link(
-			decode_middle_encrypted(link_enc)
-		)
+	for a in options.find_all("li"):
+		option = a.find("a")
+		thing = option.get_text().split(" ")
 
 		mirror = recognize_mirror(
-			a
-			.get_text()
-			.lower()
+			thing[0].replace("http:", "")
 		)
-
-		quality = "720p"
 
 		try:
 			hosts[mirror]
+			quality = thing[-1]
+
+			link_mirror = recognize_link(
+				option.get("data-link")
+			)
 
 			data = {
 				"mirror": mirror,

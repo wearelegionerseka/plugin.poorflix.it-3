@@ -1,9 +1,7 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/python3
 
 from hosts import hosts
 from requests import get
-from sys import version_info
 from bs4 import BeautifulSoup
 from hosts.exceptions.exceptions import VideoNotAvalaible
 
@@ -13,16 +11,11 @@ from scrapers.utils import (
 	get_domain, headers
 )
 
-host = "https://www.eurostreaming.golf/"
+host = "https://www.eurostreaming.bond/"
 excapes = ["Back", "back", ""]
 timeout = 4
 is_cloudflare = False
-
-if version_info.major < 3:
-	input = raw_input
-	special_char = "–".decode("utf-8")
-else:
-	special_char = "–"
+special_char = "–"
 
 def search_serie(serie_to_search):
 	search_url = "{}?s={}".format(host, serie_to_search)
@@ -79,14 +72,12 @@ def seasons(serie_to_see):
 	):
 		title_season = titles[a].get_text()[2:]
 
-		datas.append(
-			{
-				"title": title_season,
-				"episodes": []
-			}
-		)
+		info = {
+			"title": title_season,
+			"episodes": []
+		}
 
-		how = datas[a]['episodes']
+		how = info['episodes']
 		list_episodes_season = episodes[a]
 
 		for b in list_episodes_season.find_all("div"):
@@ -131,6 +122,8 @@ def seasons(serie_to_see):
 					continue
 
 			how.append(infos)
+
+		datas.append(info)
 
 	return json
 

@@ -4,7 +4,6 @@ from hosts import hosts
 from requests import get
 from bs4 import BeautifulSoup
 from hosts.exceptions.exceptions import VideoNotAvalaible
-from scrapers.exceptions.exceptions import ScrapingFailed
 
 from scrapers.utils import (
 	recognize_link, recognize_mirror,
@@ -12,7 +11,7 @@ from scrapers.utils import (
 	get_domain, headers
 )
 
-host = "https://eurostreaming.house/"
+host = "https://eurostreaming.vote/"
 excapes = ["Back", "back", ""]
 timeout = 4
 is_cloudflare = False
@@ -35,13 +34,14 @@ def search_serie(serie_to_search):
 
 	how = json['results']
 
-	for a in parsing.find_all("div", class_ = "post-thumb"):
+	for a in parsing.find_all("div", class_ = "container-index-post col-xs-6 col-sm-4 col-md-2-5 col-lg-2-5"):
 		image = a.find("img").get("src")
-		some = a.find("a")
-		link = some.get("href")
+		link = a.find("a").get("href")
 
 		title = recognize_title(
-			some.get("title")
+			a
+			.find("h2")
+			.get_text()
 		)
 
 		data = {
@@ -54,46 +54,11 @@ def search_serie(serie_to_search):
 
 	return json
 
-def is_episodes_page(link):
-	body = get(link, headers = headers).text
-	parsing = BeautifulSoup(body, "html.parser")
-
-	if "CLICCA QUI" in str(parsing):
-		try:
-			link = (
-				parsing
-				.find("div", class_ = "entry-content")
-				.find_all("h2")[1]
-				.find("a")
-				.get("href")
-			)
-
-			if not host in link:
-				raise AttributeError("")
-
-		except (AttributeError, IndexError):
-			for a in parsing.find_all("script"):
-				c = str(a)
-
-				if "go_to" in c:
-					link = (
-						c
-						.split("\"go_to\":\"")[1]
-						.split("\"")[0]
-						.replace("\\", "")
-					)
-
-					break
-
-	return link
-
 def seasons(serie_to_see):
-	serie_to_see = is_episodes_page(serie_to_see)
 	domain = get_domain(serie_to_see)
 	body = get(serie_to_see, headers = headers).text
 	parsing = BeautifulSoup(body, "html.parser")
-	titles = parsing.find_all("div", class_ = "su-spoiler-title")
-	episodes = parsing.find_all("div", class_ = "su-spoiler-content su-u-clearfix su-u-trim")
+	titles = parsing.find_all("div", class_ = "accordion-item")
 
 	json = {
 		"results": []
@@ -101,37 +66,14 @@ def seasons(serie_to_see):
 
 	datas = json['results']
 
-	for a in range(
-		len(titles)
-	):
-		title_season = titles[a].get_text()
-		list_episodes_season = episodes[a]
-		links = []
+	for title in titles:
+		season = title.find("div", id = "season")
+		title_season = ""
 
-		for b in list_episodes_season.find_all("a"):
-			mirror = recognize_mirror(
-				b.get_text()
-			)
+		for a in season.find_all("span"):
+			title_season += f"{a.get_text()} "
 
-			link_mirror = b.get("href")
-
-			if not link_mirror:
-				link_mirror = None
-			else:
-				link_mirror = recognize_link(link_mirror)
-
-			links.append(
-				("720p", mirror, link_mirror)
-			)
-
-		title_episodes_season = (
-			list_episodes_season
-			.get_text()
-			.split("\n")
-		)
-
-		del title_episodes_season[0]
-		del title_episodes_season[-1]
+		title_season = title_season[:-1]
 
 		info = {
 			"title": title_season,
@@ -139,18 +81,23 @@ def seasons(serie_to_see):
 		}
 
 		how = info['episodes']
+		list_episodes_season = title.find_all("div", class_ = "episode-wrap")
 
-		for episode in title_episodes_season:
-			episode_string_splited = episode.split(special_char)
-			episode_string_splited1 = episode_string_splited[0].split("-")
-			episode = episode_string_splited1[0]
-			del episode_string_splited[0]
+		for b in list_episodes_season:
+			episode = ""
 
-			try:
-				array = [episode_string_splited1[1]]
-				episode_string_splited = array + episode_string_splited
-			except IndexError:
-				pass
+			episode += (
+				b
+				.find("li", class_ = "season-no")
+				.get_text()
+			)
+
+			episode += " %s" % (
+				b
+				.find("li", class_ = "other_link")
+				.find("a")
+				.get_text()
+			)
 
 			infos = {
 				"episode": episode,
@@ -158,37 +105,35 @@ def seasons(serie_to_see):
 			}
 
 			how1 = infos['mirrors']
-			length_avalaible_mirrors = len(episode_string_splited)
 
-			for c in range(length_avalaible_mirrors):
+			for c in b.find_all("tr", class_ = "movkb"):
+				tds = c.find_all("td")
+				some = tds[0].find("a")
+
+				mirror = recognize_mirror(
+					some.get_text()
+				)
+
+				link_mirror = some.get("href")
+
+				if not link_mirror:
+					link_mirror = None
+				else:
+					link_mirror = recognize_link(link_mirror)
+
 				try:
-					mirror = links[0][1]
-
-					c_mirror = recognize_mirror(
-						episode_string_splited[c]
-					)
-
-					if c_mirror != mirror:
-						continue
-
 					hosts[mirror]
 
 					data = {
 						"mirror": mirror,
-						"quality": links[0][0],
-						"link": links[0][2],
+						"quality": tds[1].get_text(),
+						"link": link_mirror,
 						"domain": domain
 					}
 
 					how1.append(data)
-
-				except KeyError as a:
-					pass
-
-				except IndexError as a:
-					break
-
-				del links[0]
+				except KeyError:
+					continue
 
 			how.append(infos)
 
@@ -292,7 +237,7 @@ def menu():
 
 							try:
 								video = identify(mirrors[index])
-							except (VideoNotAvalaible, ScrapingFailed) as a:
+							except VideoNotAvalaible as a:
 								print(a)
 								continue
 

@@ -39,9 +39,12 @@ def new_way(film_to_see):
 			hosts[mirror]
 			quality = "720p"
 
-			link_mirror = recognize_link(
-				a.get("data-link")
-			)
+			link_mirror = a.get("data-link")
+			
+			if not link_mirror:
+				continue
+
+			link_mirror	= recognize_link(link_mirror)
 
 			data = {
 				"mirror": mirror,

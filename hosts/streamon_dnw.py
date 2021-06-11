@@ -3,6 +3,7 @@
 from requests import get
 from bs4 import BeautifulSoup
 from scrapers.utils import headers
+from re import DOTALL, search as re_match
 from hosts.exceptions.exceptions import VideoNotAvalaible
 
 class Metadata:
@@ -13,7 +14,8 @@ class Metadata:
 def get_video(url, referer):
 	headers['Referer'] = referer
 	body = get(url, headers = headers).text
-	parsing = BeautifulSoup(body, "html.parser")
+	print(body)
+	"""parsing = BeautifulSoup(body, "html.parser")
 
 	try:
 		video_url = (
@@ -24,4 +26,6 @@ def get_video(url, referer):
 	except AttributeError:
 		raise VideoNotAvalaible(url)
 
-	return video_url
+	return video_url"""
+
+print(get_video("https://streamon.to/d/bt6asskue8mw", ""))

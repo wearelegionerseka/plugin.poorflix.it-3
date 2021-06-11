@@ -1,9 +1,7 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/python3
 
 from hosts import hosts
 from requests import get
-from sys import version_info
 from bs4 import BeautifulSoup
 from hosts.exceptions.exceptions import VideoNotAvalaible
 from scrapers.exceptions.exceptions import ScrapingFailed
@@ -14,16 +12,11 @@ from scrapers.utils import (
 	get_domain, headers
 )
 
-host = "https://eurostreaming.center/"
+host = "https://eurostreaming.click/"
 excapes = ["Back", "back", ""]
 timeout = 4
 is_cloudflare = False
-
-if version_info.major < 3:
-	input = raw_input
-	special_char = "–".decode("utf-8")
-else:
-	special_char = "–"
+special_char = "–"
 
 def search_serie(serie_to_search):
 	search_url = "{}?s={}".format(host, serie_to_search)
@@ -111,14 +104,6 @@ def seasons(serie_to_see):
 		len(titles)
 	):
 		title_season = titles[a].get_text()
-
-		datas.append(
-			{
-				"title": title_season,
-				"episodes": []
-			}
-		)
-
 		list_episodes_season = episodes[a]
 		links = []
 
@@ -146,7 +131,13 @@ def seasons(serie_to_see):
 
 		del title_episodes_season[0]
 		del title_episodes_season[-1]
-		how = datas[a]['episodes']
+
+		info = {
+			"title": title_season,
+			"episodes": []
+		}
+
+		how = info['episodes']
 
 		for episode in title_episodes_season:
 			episode_string_splited = episode.split(special_char)
@@ -193,6 +184,8 @@ def seasons(serie_to_see):
 				del links[0]
 
 			how.append(infos)
+
+		datas.append(info)
 
 	return json
 
