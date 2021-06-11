@@ -583,11 +583,13 @@ def list_mirros_episode(
 	mirrors = []
 	title = title.lower()
 
-	def find_link(a, title):
+	def find_link(a, title, if_is = False):
 		link = None
+		print(a.__name__, title)
 
 		try:
 			results = a.search_serie(title)['results']
+			print(results)
 		except (ReadTimeout, ConnectionError):
 			pDialog.update(progress, messages['episode'])
 			return
@@ -601,7 +603,11 @@ def list_mirros_episode(
 				b = c_title
 			).ratio()
 
-			if ratio >= 0.90:
+			print(ratio)
+			print(title)
+			print(c_title)
+
+			if (ratio >= 0.90) or (if_is):
 				link = b['link']
 				break
 
@@ -616,6 +622,10 @@ def list_mirros_episode(
 
 		if not link:
 			link = find_link(a, en_title)
+
+		if not link:
+			n_title = title.split("'")[0]
+			link = find_link(a, n_title, True)
 
 		if not link:
 			pDialog.update(progress, messages['episode'])
