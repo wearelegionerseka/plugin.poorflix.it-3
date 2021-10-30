@@ -4,112 +4,112 @@
 			"link": "https://altadefinizione.cheap/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": true
+			"works": True
 		},
 
 		"altadefinizione2": {
 			"link": "https://www.altadefinizione01.coach/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": true
+			"works": True
 		},
 
 		"altadefinizione3": {
 			"link": "https://www.altadefinizione01.games/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": false
+			"works": False
 		},
 
 		"altadefinizione6": {
 			"link": "https://altadefinizione.la/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": true
+			"works": True
 		},
 
 		"altadefinizione7": {
 			"link": "https://altadefinizione01.haus/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": true
+			"works": True
 		},
 
 		"altadefinizione8": {
 			"link": "https://www.altadefinizione.bond/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": false
+			"works": False
 		},
 
 		"cbo1": {
 			"link": "https://cbo1.watch/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": true
+			"works": True
 		},
 
 		"cineblog01": {
 			"link": "https://cineblog01.bid/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": false
+			"works": False
 		},
 
 		"cineblog012": {
 			"link": "https://cineblog01.legal/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": true
+			"works": True
 		},
 
 		"eurostreaming1": {
 			"link": "https://eurostreaming.click/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": true
+			"works": True
 		},
 
 		"eurostreaming2": {
 			"link": "https://www.eurostreaming.bond/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": true
+			"works": True
 		},
 
 		"eurostreaming3": {
 			"link": "https://eurostreaming.house/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": true
+			"works": True
 		},
 
 		"eurostreaming4": {
 			"link": "https://eurostreaming.vote/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": true
+			"works": True
 		},
 
 		"ilgeniodellostreaming2": {
 			"link": "https://ilgeniodellostreaming.cyou/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": true
+			"works": True
 		},
 
 		"piratestreaming": {
 			"link": "https://www.piratestreaming.shop/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": true
+			"works": True
 		},
 
 		"serietvu": {
 			"link": "https://www.serietvu.link/",
 			"is_cloudflare": false,
 			"timeout": 8,
-			"works": false
+			"works": False
 		}
 	}
 }
